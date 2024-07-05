@@ -35,7 +35,7 @@ export class Stack<T> {
 
         const val = this.tail.val;
         this.tail = this.tail.previous!;
-        this.tail.next = null;
+        if (this.tail) this.tail.next = null;
 
         return val;
     }
