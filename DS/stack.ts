@@ -1,7 +1,7 @@
-import { DoublyListNode, type NullableNode } from "./linked-list";
+import { DoublyListNode } from "./linked-list";
 
-export class Stack<T> {
-    private tail: NullableNode<DoublyListNode<T>> = null;
+class Stack<T> {
+    private tail: DoublyListNode<T> | null = null;
 
     constructor(arr?: T[]) {
         if (!arr || !arr.length) return;
@@ -15,8 +15,9 @@ export class Stack<T> {
             );
     }
 
-    top() {
-        return this.tail?.val;
+    top(): T {
+        if (this.isEmpty()) throw Error("There's not elements left");
+        return this.tail!.val;
     }
 
     push(val: T) {
@@ -30,7 +31,7 @@ export class Stack<T> {
         }
     }
 
-    pop() {
+    pop(): T {
         if (!this.tail) throw Error("There's not elements left");
 
         const val = this.tail.val;
@@ -44,3 +45,5 @@ export class Stack<T> {
         return !this.tail;
     }
 }
+
+export { Stack };

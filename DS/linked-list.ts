@@ -1,37 +1,37 @@
-type NullableNode<T> = T | null;
-
 const validateIndex = (index: number, size: number) => {
     if (index < 0 || index >= size) throw Error("Index out of range");
     if (index % 1 !== 0) throw Error("Index must be integer");
 };
 
 class SinglyListNode<T> {
-    constructor(
-        public val: T,
-        public next: NullableNode<SinglyListNode<T>> = null
-    ) {}
+    constructor(public val: T, public next: SinglyListNode<T> | null = null) {}
 }
 
 class DoublyListNode<T> {
     constructor(
         public val: T,
-        public next: NullableNode<DoublyListNode<T>> = null,
-        public previous: NullableNode<DoublyListNode<T>> = null
+        public next: DoublyListNode<T> | null = null,
+        public previous: DoublyListNode<T> | null = null
     ) {}
 }
 
 class LinkedList<T> {
-    private head: NullableNode<SinglyListNode<T>> = null;
+    private head: SinglyListNode<T> | null = null;
     private size = 0;
 
     constructor(arr?: T[]) {
-        if (arr) Object.assign(this, LinkedList.fromArray(arr));
+        if (!arr || !arr.length) return;
+
+        this.head = new SinglyListNode(arr[0]);
+        this.size = arr.length;
+
+        for (let i = 1, curr = this.head; i < arr.length; i++, curr = curr.next)
+            curr.next = new SinglyListNode(arr[i]);
     }
 
     find(val: T) {
-        for (let curr = this.head, i = 0; curr; curr = curr.next, i++) {
+        for (let curr = this.head, i = 0; curr; curr = curr.next, i++)
             if (curr.val === val) return i;
-        }
         return -1;
     }
 
@@ -96,17 +96,6 @@ class LinkedList<T> {
     getSize() {
         return this.size;
     }
-
-    static fromArray<T>(arr: T[]) {
-        const list = new LinkedList<T>();
-        list.head = new SinglyListNode(arr[0]);
-        list.size = arr.length;
-
-        for (let i = 1, curr = list.head; i < arr.length; i++, curr = curr.next)
-            curr.next = new SinglyListNode(arr[i]);
-
-        return list;
-    }
 }
 
-export { type NullableNode, SinglyListNode, DoublyListNode, LinkedList };
+export { SinglyListNode, DoublyListNode, LinkedList };
