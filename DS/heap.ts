@@ -45,11 +45,8 @@ class Heap {
             return;
         }
 
-        // Find the direction from the root to the new node
-        const directions = this.getDirections();
-
-        // Get the path using the given directions and set new node
-        const path = this.getPath(directions, val);
+        // Get the path from the root to the nearest empty place and set new node
+        const path = this.getPath(val);
 
         // Check the heap sort
         this.heapifyUp(path);
@@ -64,12 +61,8 @@ class Heap {
             this.size = 0;
             return val;
         }
-
-        // Find the direction from the root to the new node
-        const directions = this.getDirections();
-
         // Swap the value of last node with the root's value
-        this.swapRootAndLastNode(directions);
+        this.swapRootAndLastNode();
 
         // Check the heap sort
         this.heapifyDown();
@@ -78,47 +71,53 @@ class Heap {
         return val;
     }
 
-    getDirections() {
+    *nodeGenerator() {
         const treeHeight = Math.ceil(Math.log2(this.size + 1));
-        const directions = new Stack<"left" | "right">();
+        let a = 1,
+            b = 2 ** (treeHeight - 1);
+        const nodeIndex = this.size - b + 1;
+        let lastNode = this.root!;
 
-        for (let currNode = this.size, i = 1; i < treeHeight; i++) {
-            const nodeIndexInLevel = currNode - (2 ** (treeHeight - i) - 1);
-            if (i !== 1)
-                directions.push(nodeIndexInLevel % 2 ? "left" : "right");
-            currNode =
-                Math.ceil(nodeIndexInLevel / 2) +
-                (2 ** (treeHeight - i - 1) - 1);
+        while (b - a > 1) {
+            const half = (b - a + 1) / 2;
+            if (half >= nodeIndex) {
+                lastNode = lastNode.left!;
+                b = half;
+            } else {
+                lastNode = lastNode.right!;
+                a = half + 1;
+            }
+            yield lastNode;
         }
-
-        return directions;
     }
 
-    getPath(directions: Stack<"right" | "left">, val: number) {
+    getPath(val: number) {
         const path = new Stack([this.root!]);
+        const generator = this.nodeGenerator();
 
-        while (!directions.isEmpty()) path.push(path.top()![directions.pop()]!);
+        for (const node of generator) path.push(node);
 
-        const lastPrant = path.top()!;
         const newNode = new BinaryTreeNode(val);
-
-        if (!lastPrant.left) lastPrant.left = newNode;
-        else lastPrant.right = newNode;
+        const lastNode = path.top();
+        if (!lastNode.left) lastNode.left = newNode;
+        else lastNode.right = newNode;
 
         path.push(newNode);
         return path;
     }
 
-    swapRootAndLastNode(directions: Stack<"right" | "left">) {
-        let curr = this.root!;
-        while (!directions.isEmpty()) curr = curr[directions.pop()]!;
+    swapRootAndLastNode() {
+        const generator = this.nodeGenerator();
+        let lastNode = this.root!;
+        
+        for (const node of generator) lastNode = node;
 
-        if (curr.left) {
-            this.root!.val = curr.left.val;
-            curr.left = null;
+        if (lastNode.left) {
+            this.root!.val = lastNode.left.val;
+            lastNode.left = null;
         } else {
-            this.root!.val = curr.right!.val;
-            curr.right = null;
+            this.root!.val = lastNode.right!.val;
+            lastNode.right = null;
         }
     }
 
